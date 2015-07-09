@@ -1,3 +1,5 @@
+--<<Simple courier bottle abuse>>
+
 require("libs.Utils")
 require("libs.ScriptConfig")
 
