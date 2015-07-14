@@ -141,7 +141,7 @@ function Tick(tick)
 		if showOnTowers then calculateDamage(entityList:GetEntities({classId = CDOTA_BaseNPC_Tower, team = enemyTeam}), towerDamageSpells, me) end
 		
 	end
-	
+
 	Sleep(333)
 
 end
@@ -178,6 +178,7 @@ function calculateDamage(units, spells, me)
 				
 				local aDamage = AbilityDamage.GetDamage(spell)
 				local aType = abilityType(spell.dmgType)
+				local myDamage = me.dmgMin + me.dmgBonus
 				
 				---- spell corrections
 				if spell.name == "earthshaker_fissure" then
@@ -190,24 +191,24 @@ function calculateDamage(units, spells, me)
 				elseif spell.name == "pugna_nether_blast" then
 					if unit.classId == CDOTA_BaseNPC_Tower then
 						aType = DAMAGE_PURE
-						aDamage = aDamage/2
+						aDamage = aDamage / 2
 					end
 				elseif spell.name == "tiny_toss" then
 					if unit.classId == CDOTA_BaseNPC_Tower then
 						aType = DAMAGE_PURE
-						aDamage = aDamage/3
+						aDamage = aDamage  / 3
 					end
 				elseif spell.name == "undying_decay" then
 					local damage = {20, 60, 100, 140}
 					aDamage = damage[spell.level]
 				elseif spell.name == "templar_assassin_meld" then
 					if unit.classId ~= CDOTA_BaseNPC_Creep_Lane then
-						aDamage = me.dmgMin/2 + aDamage
+						aDamage = myDamage / 2 + aDamage
 					else
-						aDamage = me.dmgMin + aDamage
+						aDamage = myDamage + aDamage
 					end
 				elseif spell.name == "ember_spirit_sleight_of_fist" then
-					aDamage = me.dmgMin/2
+					aDamage = myDamage / 2
 				elseif spell.name == "razor_plasma_field" then
 					local damageMin = {30, 50, 70, 90}
 					local damageMax = {160, 230, 300, 370}
@@ -221,9 +222,9 @@ function calculateDamage(units, spells, me)
 					end
 				elseif spell.name == "clinkz_searing_arrows" then
 					if unit.classId ~= CDOTA_BaseNPC_Creep_Lane then
-						aDamage = me.dmgMin/2 + aDamage
+						aDamage = myDamage / 2 + aDamage
 					else
-						aDamage = me.dmgMin + aDamage
+						aDamage = myDamage + aDamage
 					end
 				elseif spell.name == "keeper_of_the_light_illuminate" then
 					aDamage = aDamage + 100
@@ -245,7 +246,7 @@ function calculateDamage(units, spells, me)
 				----
 				
 				local spellDamageTaken = math.floor(unit:DamageTaken(aDamage, aType, me))
-				local autoAttackDamageTaken = math.floor(unit:DamageTaken(me.dmgMin, DAMAGE_PHYS, me))
+				local autoAttackDamageTaken = math.floor(unit:DamageTaken(myDamage, DAMAGE_PHYS, me))
 
 				if unit.health <= spellDamageTaken then
 					icon[hand].visible = true
