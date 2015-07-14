@@ -184,7 +184,7 @@ function calculateDamage(units, spells, me)
 					if GetDistance2D(me, unit) <= 325 then
 						local aftershock = me:GetAbility(3)
 						if aftershock and aftershock.level > 0 then
-							aDamage = aDamage + aDamage.GetDamage(aftershock)
+							aDamage = aDamage + AbilityDamage.GetDamage(aftershock)
 						end
 					end
 				elseif spell.name == "pugna_nether_blast" then
@@ -234,10 +234,12 @@ function calculateDamage(units, spells, me)
 					local damage = {75, 100, 125, 150}
 					aDamage = aDamage + damage[spell.level]
 				elseif spell.name == "zuus_arc_lightning" then
-					local static = me:GetAbility(3)
-					if static and static.level > 0 and GetDistance2D(me, unit) <= 1225  then
-						local damage = {0.05, 0.07, 0.09, 0.11}
-						aDamage = aDamage + unit.health * damage[spell.level]
+					if GetDistance2D(me, unit) <= 1225  then
+						local static = me:GetAbility(3)
+						if static and static.level > 0 then
+							local damage = {0.05, 0.07, 0.09, 0.11}
+							aDamage = aDamage + unit.health * damage[spell.level]
+						end
 					end
 				end
 				----
