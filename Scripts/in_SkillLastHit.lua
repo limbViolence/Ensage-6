@@ -6,6 +6,7 @@ require("libs.AbilityDamage")
 
 local config = ScriptConfig.new()
 config:SetParameter("Toggle", "L", config.TYPE_HOTKEY)
+config:SetParameter("IconSide", "Center")
 config:SetParameter("ShowAutoAttackHit", true)
 config:SetParameter("ShowOnCreeps", true)
 config:SetParameter("ShowOnCatapults", true)
@@ -13,6 +14,7 @@ config:SetParameter("ShowOnTowers", true)
 config:Load()
 
 local toggleKey = config.Toggle
+local side = config.IconSide
 local oneHit = config.ShowAutoAttackHit
 local showOnCreeps = config.ShowOnCreeps
 local showOnCatapults = config.ShowOnCatapults
@@ -89,6 +91,7 @@ local creepDamageSpells = {
 	"pugna_nether_blast",
 	"dazzle_shadow_wave",
 	"leshrac_lightning_storm",
+	"silencer_glaives_of_wisdom",
 	"winter_wyvern_splinter_blast",
 }
 
@@ -166,7 +169,15 @@ function calculateDamage(units, spells, me)
 			local hand = unit.handle
 			
 			if not icon[hand] then
-				icon[hand] = drawMgr:CreateRect(-35 * shft, -32  * shft, 0, 0, 0xFF8AB160)
+			
+				local sideFix = -12
+				if side == "Left" then sideFix = -34
+				elseif side == "Right" then sideFix = 12 end
+				
+				local towerFix = -32
+				if unit.classId == CDOTA_BaseNPC_Tower then towerFix = -75 end
+				
+				icon[hand] = drawMgr:CreateRect(sideFix * shft, towerFix * shft, 0, 0, 0xFF8AB160)
 				icon[hand].entity = unit 
 				icon[hand].entityPosition =  Vector(0, 0, offset)
 				icon[hand].w = 20 * shft
@@ -196,12 +207,12 @@ function calculateDamage(units, spells, me)
 				elseif spell.name == "tiny_toss" then
 					if unit.classId == CDOTA_BaseNPC_Tower then
 						aType = DAMAGE_PURE
-						aDamage = aDamage  / 3
+						aDamage = aDamage / 3
 					end
 				elseif spell.name == "undying_decay" then
 					local damage = {20, 60, 100, 140}
 					aDamage = damage[spell.level]
-				elseif spell.name == "templar_assassin_meld" then
+				elseif spell.name == "templar_assassin_meld" or spell.name == "clinkz_searing_arrows" then
 					if unit.classId ~= CDOTA_BaseNPC_Creep_Lane then
 						aDamage = myDamage / 2 + aDamage
 					else
@@ -220,12 +231,6 @@ function calculateDamage(units, spells, me)
 							aDamage = damageMin[plasmaLevel]
 						end
 					end
-				elseif spell.name == "clinkz_searing_arrows" then
-					if unit.classId ~= CDOTA_BaseNPC_Creep_Lane then
-						aDamage = myDamage / 2 + aDamage
-					else
-						aDamage = myDamage + aDamage
-					end
 				elseif spell.name == "keeper_of_the_light_illuminate" then
 					aDamage = aDamage + 100
 				elseif spell.name == "techies_land_mines" then
@@ -242,6 +247,9 @@ function calculateDamage(units, spells, me)
 							aDamage = aDamage + unit.health * damage[spell.level]
 						end
 					end
+				elseif spell.name == "silencer_glaives_of_wisdom" then
+					local damage = {0.3, 0.5, 0.7, 0.9}
+					aDamage = myDamage + me.intellectTotal * damage[spell.level]
 				end
 				----
 				
