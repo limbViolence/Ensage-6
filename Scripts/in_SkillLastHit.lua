@@ -11,6 +11,7 @@ config:SetParameter("ShowAutoAttackHit", true)
 config:SetParameter("ShowOnCreeps", true)
 config:SetParameter("ShowOnCatapults", true)
 config:SetParameter("ShowOnTowers", true)
+config:SetParameter("ShowOnNeutrals", true)
 config:Load()
 
 local toggleKey = config.Toggle
@@ -19,6 +20,7 @@ local oneHit = config.ShowAutoAttackHit
 local showOnCreeps = config.ShowOnCreeps
 local showOnCatapults = config.ShowOnCatapults
 local showOnTowers = config.ShowOnTowers
+local showOnNeutrals = config.ShowOnNeutrals
 
 local inGame = false
 local showIcon = true
@@ -142,10 +144,11 @@ function Tick(tick)
 		if showOnCreeps then calculateDamage(entityList:GetEntities({classId = CDOTA_BaseNPC_Creep_Lane, team = enemyTeam}), creepDamageSpells, me) end
 		if showOnCatapults then calculateDamage(entityList:GetEntities({classId = CDOTA_BaseNPC_Creep_Siege, team = enemyTeam}), catapultDamageSpells, me) end
 		if showOnTowers then calculateDamage(entityList:GetEntities({classId = CDOTA_BaseNPC_Tower, team = enemyTeam}), towerDamageSpells, me) end
+		if showOnNeutrals then calculateDamage(entityList:GetEntities({classId = CDOTA_BaseNPC_Creep_Neutral}), creepDamageSpells, me) end
 		
 	end
 
-	Sleep(333)
+	Sleep(200)
 
 end
 
@@ -164,7 +167,7 @@ function calculateDamage(units, spells, me)
 		
 		local offset = unit.healthbarOffset
 	
-		if offset ~= -1 then
+		if offset ~= -1 and not unit.ancient then
 			
 			local hand = unit.handle
 			
@@ -188,7 +191,7 @@ function calculateDamage(units, spells, me)
 			if unit.visible and unit.alive then
 				
 				local aDamage = AbilityDamage.GetDamage(spell)
-				local aType = abilityType(spell.dmgType)
+				local aType = AbilityDamage.GetDmgType(spell)
 				local myDamage = me.dmgMin + me.dmgBonus
 				
 				---- spell corrections
@@ -213,7 +216,7 @@ function calculateDamage(units, spells, me)
 					local damage = {20, 60, 100, 140}
 					aDamage = damage[spell.level]
 				elseif spell.name == "templar_assassin_meld" or spell.name == "clinkz_searing_arrows" then
-					if unit.classId ~= CDOTA_BaseNPC_Creep_Lane then
+					if unit.classId == CDOTA_BaseNPC_Tower or unit.classId == CDOTA_BaseNPC_Creep_Siege then
 						aDamage = myDamage / 2 + aDamage
 					else
 						aDamage = myDamage + aDamage
@@ -271,16 +274,6 @@ function calculateDamage(units, spells, me)
 			end
 		
 		end
-	end
-end
-
-function abilityType(ability)
-	if ability == LuaEntityAbility.DAMAGE_TYPE_MAGICAL then
-		return DAMAGE_MAGC	
-	elseif ability == LuaEntityAbility.DAMAGE_TYPE_PURE then
-		return DAMAGE_PURE
-	else
-		return DAMAGE_PHYS
 	end
 end
 
